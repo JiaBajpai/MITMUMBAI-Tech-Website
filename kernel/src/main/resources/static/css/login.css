@@ -1,0 +1,452 @@
+@import url('https://fonts.googleapis.com/css2?family=Numans&family=Raleway:wght@400;500;600;700&family=Ubuntu+Mono:wght@400;700&display=swap');
+
+
+/* ---------- Color Palette ---------- */
+
+:root {
+    --carbon-black: #222222;
+    --white: #ffffff;
+    --baltic-blue: #1c5d99;
+    --pacific-blue: #639fab;
+    --powder-blue: #bbcde5;
+    --border: #d9dfe6;
+    --muted-text: #737b84;
+}
+
+
+/* ---------- Reset ---------- */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+}
+
+
+body {
+    font-family: 'Raleway', sans-serif;
+    color: var(--carbon-black);
+    background: var(--white);
+}
+
+
+/* ---------- Main Page ---------- */
+
+.login-page {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+}
+
+
+/* ---------- Left Illustration ---------- */
+
+.illustration-section {
+    width: 55%;
+    min-height: 100vh;
+    position: relative;
+
+    background: var(--powder-blue);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    overflow: hidden;
+}
+
+
+.login-illustration {
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+    display: block;
+}
+
+
+/* ---------- Right Login Section ---------- */
+
+.login-section {
+    width: 46.6667%;
+    min-height: 100vh;
+    position: relative;
+
+    background: var(--white);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+/* ---------- Logo ---------- */
+
+.logo-container {
+    position: absolute;
+    top: 52px;
+    right: 56px;
+}
+
+
+.logo {
+    width: 222px;
+    height: auto;
+
+    display: block;
+    object-fit: contain;
+}
+
+
+/* ---------- Login Container ---------- */
+
+.login-container {
+    width: min(400px, 75%);
+    margin-top: 20px;
+}
+
+
+/* ---------- Heading ---------- */
+
+.login-heading {
+    margin-bottom: 38px;
+}
+
+
+.technical-label {
+    display: block;
+
+    margin-bottom: 12px;
+
+    font-family: 'Ubuntu Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 2.5px;
+
+    color: var(--baltic-blue);
+}
+
+
+.login-heading h1 {
+    font-family: 'Raleway', sans-serif;
+    font-size: 32px;
+    font-weight: 600;
+    line-height: 1.2;
+
+    color: var(--carbon-black);
+
+    margin-bottom: 12px;
+}
+
+
+.login-heading p {
+    font-family: 'Numans', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+
+    color: var(--muted-text);
+}
+
+
+/* ---------- Form ---------- */
+
+.login-form {
+    width: 100%;
+}
+
+
+.form-group {
+    width: 100%;
+    margin-bottom: 24px;
+}
+
+
+.form-group label {
+    display: block;
+
+    margin-bottom: 9px;
+
+    font-family: 'Raleway', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+
+    color: var(--carbon-black);
+}
+
+
+.form-group input {
+    width: 100%;
+    height: 52px;
+
+    padding: 0 16px;
+
+    border: 1px solid var(--border);
+    border-radius: 2px;
+
+    outline: none;
+
+    background: var(--white);
+
+    font-family: 'Raleway', sans-serif;
+    font-size: 14px;
+
+    color: var(--carbon-black);
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.form-group input::placeholder {
+    color: #9aa1a8;
+}
+
+
+.form-group input:hover {
+    border-color: var(--pacific-blue);
+}
+
+
+.form-group input:focus {
+    border-color: var(--baltic-blue);
+
+    box-shadow:
+        0 0 0 3px rgba(28, 93, 153, 0.10);
+}
+
+
+/* ---------- Button ---------- */
+
+.login-button {
+    width: 100%;
+    height: 52px;
+
+    margin-top: 4px;
+
+    border: none;
+    border-radius: 2px;
+
+    background: var(--baltic-blue);
+    color: var(--white);
+
+    font-family: 'Raleway', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.15s ease;
+}
+
+
+.login-button:hover {
+    background: #174f82;
+}
+
+
+.login-button:active {
+    transform: translateY(1px);
+}
+
+
+/* ---------- Footer ---------- */
+
+.login-footer {
+    margin-top: 34px;
+
+    font-family: 'Ubuntu Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1.8px;
+
+    color: #a0a6ad;
+}
+
+
+/* =====================================================
+   MOBILE
+   ===================================================== */
+
+@media (max-width: 768px) {
+
+    /* Entire page becomes one layer */
+    .login-page {
+        position: relative;
+
+        width: 100%;
+        min-height: 100vh;
+        height: 100vh;
+
+        display: block;
+
+        overflow: hidden;
+    }
+
+
+    /* -----------------------------------------
+       Illustration becomes background
+       ----------------------------------------- */
+
+    .illustration-section {
+        position: absolute;
+
+        inset: 0;
+
+        width: 100%;
+        height: 100%;
+        min-height: 100vh;
+
+        display: block;
+
+        background: var(--powder-blue);
+
+        z-index: 0;
+    }
+
+
+    .login-illustration {
+        width: 100%;
+        height: 100%;
+
+        object-fit: cover;
+
+        opacity: 0.5;
+    }
+
+
+    /* -----------------------------------------
+       Login section sits on top
+       ----------------------------------------- */
+
+    .login-section {
+        position: relative;
+
+        width: 100%;
+        min-height: 100vh;
+        height: 100vh;
+
+        display: flex;
+
+        align-items: center;
+        justify-content: center;
+
+        padding: 24px;
+
+        background: transparent;
+
+        z-index: 1;
+    }
+
+
+    /* -----------------------------------------
+       Logo
+       ----------------------------------------- */
+
+    .logo-container {
+        position: absolute;
+
+        top: 24px;
+        right: 24px;
+
+        z-index: 3;
+    }
+
+
+    .logo {
+        width: 150px;
+    }
+
+
+    /* -----------------------------------------
+       White Login Card
+       ----------------------------------------- */
+
+    .login-container {
+        position: relative;
+
+        width: min(400px, 100%);
+
+        margin: 0;
+
+        padding: 32px;
+
+        background: #ffffff;
+
+        opacity: 1;
+
+        border-radius: 10px;
+
+        box-shadow:
+            0 12px 40px rgba(0, 0, 0, 0.15);
+
+        z-index: 2;
+    }
+
+
+    .login-heading {
+        margin-bottom: 30px;
+    }
+
+
+    .login-heading h1 {
+        font-size: 30px;
+    }
+
+
+    .login-heading p {
+        font-size: 14px;
+    }
+
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+
+    .login-footer {
+        margin-top: 28px;
+    }
+}
+
+
+/* =====================================================
+   SMALL PHONES
+   ===================================================== */
+
+@media (max-width: 400px) {
+
+    .login-section {
+        padding: 16px;
+    }
+
+
+    .login-container {
+        padding: 26px 22px;
+    }
+
+
+    .logo-container {
+        top: 18px;
+        right: 18px;
+    }
+
+
+    .logo {
+        width: 125px;
+    }
+
+
+    .login-heading h1 {
+        font-size: 28px;
+    }
+}
