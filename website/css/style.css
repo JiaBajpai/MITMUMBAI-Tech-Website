@@ -1,0 +1,1516 @@
+/* =========================================
+   RESET
+========================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+}
+
+
+body {
+    overflow: hidden;
+
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "SF Pro Display",
+        "SF Pro Text",
+        "Segoe UI",
+        sans-serif;
+}
+
+
+/* =========================================
+   DESKTOP
+========================================= */
+
+.desktop {
+    position: relative;
+
+    width: 100vw;
+    height: 100vh;
+
+    background-image: url("../assets/Untitled.png");
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    overflow: hidden;
+}
+
+
+/* =========================================
+   TOP BAR
+========================================= */
+
+.top-bar {
+    position: fixed;
+
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 18px;
+
+    background: rgba(20, 20, 20, 0.50);
+
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+
+    color: white;
+
+    font-size: 13px;
+
+    z-index: 1000;
+
+    user-select: none;
+}
+
+
+.menu-left {
+    display: flex;
+    align-items: center;
+
+    gap: 22px;
+}
+
+
+.brand {
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+}
+
+
+.brand img {
+    width: 18px;
+    height: 18px;
+
+    object-fit: contain;
+}
+
+
+.kernel-name {
+    font-weight: 600;
+
+    letter-spacing: 0.3px;
+
+    white-space: nowrap;
+}
+
+
+.menu-left > span {
+    opacity: 0.9;
+
+    cursor: default;
+}
+
+
+.menu-right {
+    display: flex;
+    align-items: center;
+}
+
+
+#clock {
+    white-space: nowrap;
+}
+
+
+/* =========================================
+   DESKTOP FOLDERS
+========================================= */
+
+.desktop-icons {
+    position: absolute;
+
+    inset: 0;
+
+    pointer-events: none;
+
+    z-index: 10;
+}
+
+
+.desktop-icon {
+    position: absolute;
+
+    width: 100px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 7px;
+
+    padding: 7px;
+
+    border-radius: 8px;
+
+    color: rgb(151, 239, 0);
+
+    cursor: grab;
+
+    user-select: none;
+
+    pointer-events: auto;
+
+    touch-action: none;
+
+    transition:
+        background 0.15s ease,
+        transform 0.15s ease;
+}
+
+
+.desktop-icon:active {
+    cursor: grabbing;
+}
+
+
+.desktop-icon img {
+    width: 64px;
+    height: 64px;
+
+    object-fit: contain;
+
+    pointer-events: none;
+
+    filter:
+        drop-shadow(
+            0 3px 5px rgba(0, 0, 0, 0.35)
+        );
+}
+
+
+/* FOLDER TEXT */
+
+.desktop-icon span {
+    display: block;
+
+    padding: 3px 7px;
+
+    border-radius: 4px;
+
+    color: rgba(0, 18, 91, 0.96);
+
+    font-size: 13px;
+    font-weight: 500;
+
+    letter-spacing: 0.15px;
+
+    text-align: center;
+
+    white-space: nowrap;
+
+    pointer-events: none;
+
+    text-shadow:
+        0 1px 3px rgba(191, 237, 255, 0.95),
+        0 0 5px rgb(113, 222, 255);
+
+    transition:
+        background 0.15s ease,
+        color 0.15s ease;
+}
+
+
+/* FOLDER HOVER */
+
+.desktop-icon:hover {
+    background: rgba(0, 115, 255, 0.12);
+}
+
+
+.desktop-icon:hover span {
+    background: rgba(0, 0, 0, 0.28);
+}
+
+
+/* SELECTED FOLDER */
+
+.desktop-icon.selected {
+    background: rgba(70, 140, 255, 0.25);
+
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+}
+
+
+.desktop-icon.selected span {
+    background: rgba(50, 120, 255, 0.7);
+
+    color: white;
+}
+
+
+/* DRAGGING */
+
+.desktop-icon.dragging {
+    cursor: grabbing;
+
+    background: rgba(255, 255, 255, 0.18);
+
+    transform: scale(1.05);
+
+    z-index: 100;
+}
+
+
+/* =========================================
+   DOCK
+========================================= */
+
+.dock {
+    position: fixed;
+
+    left: 50%;
+    bottom: 12px;
+
+    transform: translateX(-50%);
+
+    height: 78px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 10px 14px;
+
+    background: rgba(30, 30, 30, 0.48);
+
+    border: 1px solid rgba(255, 255, 255, 0.25);
+
+    border-radius: 22px;
+
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+
+    box-shadow:
+        0 8px 30px rgba(0, 0, 0, 0.35);
+
+    z-index: 1000;
+
+    user-select: none;
+}
+
+
+.dock-icon {
+    position: relative;
+
+    width: 58px;
+    height: 58px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border: none;
+
+    background: transparent;
+
+    border-radius: 14px;
+
+    cursor: pointer;
+
+    text-decoration: none;
+
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease;
+}
+
+
+.dock-icon img {
+    width: 52px;
+    height: 52px;
+
+    object-fit: contain;
+
+    pointer-events: none;
+
+    filter:
+        drop-shadow(
+            0 3px 4px rgba(0, 0, 0, 0.4)
+        );
+}
+
+
+.dock-icon:hover {
+    transform:
+        translateY(-8px)
+        scale(1.08);
+
+    background:
+        rgba(255, 255, 255, 0.12);
+}
+
+
+/* KERNEL APP */
+
+.kernel-app {
+    margin-left: 8px;
+
+    padding-left: 10px;
+
+    border-left:
+        1px solid rgba(255, 255, 255, 0.3);
+}
+
+
+.kernel-app:hover {
+    background:
+        rgba(255, 255, 255, 0.15);
+}
+
+
+/* =========================================
+   DOCK TOOLTIP
+========================================= */
+
+.dock-tooltip {
+    position: absolute;
+
+    bottom: 70px;
+    left: 50%;
+
+    transform:
+        translateX(-50%)
+        translateY(5px);
+
+    padding: 6px 9px;
+
+    border-radius: 6px;
+
+    background: rgba(25, 25, 25, 0.85);
+
+    border: 1px solid rgba(255, 255, 255, 0.15);
+
+    color: white;
+
+    font-size: 11px;
+    font-weight: 500;
+
+    white-space: nowrap;
+
+    pointer-events: none;
+
+    opacity: 0;
+
+    transition:
+        opacity 0.15s ease,
+        transform 0.15s ease;
+
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+
+.dock-icon:hover .dock-tooltip {
+    opacity: 1;
+
+    transform:
+        translateX(-50%)
+        translateY(0);
+}
+
+
+/* =========================================
+   APPLICATION WINDOWS
+========================================= */
+
+.window-container {
+    position: absolute;
+
+    inset: 0;
+
+    pointer-events: none;
+
+    z-index: 100;
+}
+
+
+.app-window {
+    position: absolute;
+
+    width: 650px;
+    height: 450px;
+
+    left: 50%;
+    top: 50%;
+
+    transform: translate(-50%, -50%);
+
+    background: rgba(25, 25, 25, 0.82);
+
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+
+    border:
+        1px solid rgba(255, 255, 255, 0.18);
+
+    border-radius: 12px;
+
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.45),
+        0 0 0 1px rgba(255, 255, 255, 0.05);
+
+    overflow: hidden;
+
+    display: none;
+
+    pointer-events: auto;
+}
+
+
+/* =========================================
+   WINDOW HEADER
+========================================= */
+
+.window-header {
+    height: 42px;
+
+    display: flex;
+    align-items: center;
+
+    position: relative;
+
+    background:
+        rgba(40, 40, 40, 0.72);
+
+    border-bottom:
+        1px solid rgba(255, 255, 255, 0.1);
+
+    cursor: grab;
+
+    user-select: none;
+}
+
+
+.window-header:active {
+    cursor: grabbing;
+}
+
+
+.window-controls {
+    display: flex;
+
+    gap: 8px;
+
+    margin-left: 14px;
+}
+
+
+.window-btn {
+    width: 13px;
+    height: 13px;
+
+    border: none;
+
+    border-radius: 50%;
+
+    padding: 0;
+
+    cursor: pointer;
+}
+
+
+.window-btn.close {
+    background: #ff5f57;
+}
+
+
+.window-btn.minimize {
+    background: #febc2e;
+}
+
+
+.window-btn.maximize {
+    background: #28c840;
+}
+
+
+.window-title {
+    position: absolute;
+
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    font-size: 13px;
+
+    font-weight: 500;
+
+    color:
+        rgba(255, 255, 255, 0.85);
+
+    pointer-events: none;
+}
+
+
+/* =========================================
+   WINDOW CONTENT
+========================================= */
+
+.window-content {
+    height: calc(100% - 42px);
+
+    padding: 32px 36px;
+
+    overflow-y: auto;
+
+    color: white;
+}
+
+
+.window-content h1 {
+    margin: 0 0 12px 0;
+
+    font-size: 28px;
+
+    font-weight: 600;
+
+    letter-spacing: -0.3px;
+}
+
+
+.window-content h2 {
+    margin: 0 0 10px 0;
+
+    font-size: 21px;
+
+    font-weight: 600;
+}
+
+
+.window-content h3 {
+    margin: 0 0 7px 0;
+
+    font-size: 16px;
+
+    font-weight: 600;
+}
+
+
+.window-content p {
+    color:
+        rgba(255, 255, 255, 0.72);
+
+    line-height: 1.6;
+
+    font-size: 14px;
+}
+
+
+.window-description {
+    margin-bottom: 26px;
+}
+
+
+/* =========================================
+   ABOUT
+========================================= */
+
+.about-section {
+    margin-bottom: 32px;
+}
+
+
+.about-section:last-child {
+    margin-bottom: 0;
+}
+
+
+.about-section h1 {
+    margin: 0 0 12px 0;
+
+    font-size: 30px;
+}
+
+
+.about-section h2 {
+    margin: 0 0 10px 0;
+
+    font-size: 21px;
+}
+
+
+.about-section p {
+    margin: 0;
+
+    color:
+        rgba(255, 255, 255, 0.72);
+
+    line-height: 1.65;
+}
+
+
+.about-section ul {
+    margin: 0;
+
+    padding-left: 22px;
+
+    color:
+        rgba(255, 255, 255, 0.82);
+}
+
+
+.about-section li {
+    margin-bottom: 8px;
+
+    font-size: 14px;
+
+    line-height: 1.5;
+}
+
+
+.about-section li:last-child {
+    margin-bottom: 0;
+}
+
+
+/* =========================================
+   DOMAIN CARDS
+========================================= */
+
+.domain-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 15px;
+}
+
+
+.domain-card {
+    position: relative;
+
+    min-height: 140px;
+
+    padding: 22px;
+
+    border-radius: 10px;
+
+    background:
+        rgba(255, 255, 255, 0.07);
+
+    border:
+        1px solid rgba(255, 255, 255, 0.10);
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease,
+        border 0.2s ease;
+
+    cursor: pointer;
+}
+
+
+.domain-card:hover {
+    background:
+        rgba(255, 255, 255, 0.12);
+
+    border:
+        1px solid rgba(255, 255, 255, 0.18);
+
+    transform: translateY(-2px);
+}
+
+
+.domain-number {
+    display: block;
+
+    margin-bottom: 14px;
+
+    color:
+        rgba(255, 255, 255, 0.38);
+
+    font-size: 11px;
+
+    font-family: monospace;
+}
+
+
+.domain-card p {
+    font-size: 13px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================
+   EVENTS
+========================================= */
+
+.event-list {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 13px;
+}
+
+
+.event-card {
+    padding: 18px 20px;
+
+    border-radius: 10px;
+
+    background:
+        rgba(255, 255, 255, 0.07);
+
+    border:
+        1px solid rgba(255, 255, 255, 0.1);
+}
+
+
+.event-tag {
+    display: inline-block;
+
+    margin-bottom: 8px;
+
+    color:
+        rgba(255, 255, 255, 0.45);
+
+    font-size: 10px;
+
+    letter-spacing: 1px;
+
+    font-weight: 600;
+}
+
+
+/* =========================================
+   CONTACT
+========================================= */
+
+.contact-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 14px;
+}
+
+
+.contact-item {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 7px;
+
+    padding: 18px;
+
+    border-radius: 10px;
+
+    background:
+        rgba(255, 255, 255, 0.07);
+
+    border:
+        1px solid rgba(255, 255, 255, 0.1);
+}
+
+
+.contact-label {
+    font-size: 10px;
+
+    letter-spacing: 1px;
+
+    color:
+        rgba(255, 255, 255, 0.42);
+}
+
+
+.contact-value {
+    color:
+        rgba(255, 255, 255, 0.88);
+
+    font-size: 14px;
+}
+
+
+/* =========================================
+   TERMINAL
+========================================= */
+
+.terminal-window {
+    width: 700px;
+
+    height: 460px;
+
+    background:
+        rgba(12, 12, 12, 0.94);
+
+    font-family:
+        "SF Mono",
+        "Cascadia Code",
+        "JetBrains Mono",
+        "Fira Code",
+        monospace;
+}
+
+
+.terminal-content {
+    height: calc(100% - 42px);
+
+    padding: 18px 20px;
+
+    overflow-y: auto;
+
+    color: #e5e5e5;
+
+    font-size: 13px;
+
+    line-height: 1.6;
+}
+
+
+.terminal-output {
+    white-space: pre-wrap;
+
+    word-break: break-word;
+}
+
+
+.terminal-form {
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    margin-top: 5px;
+}
+
+
+.terminal-prompt {
+    color: #70d6a0;
+
+    white-space: nowrap;
+}
+
+
+#terminal-input {
+    flex: 1;
+
+    min-width: 0;
+
+    border: none;
+    outline: none;
+
+    background: transparent;
+
+    color: #f1f1f1;
+
+    font: inherit;
+}
+
+
+.terminal-green {
+    color: #70d6a0;
+}
+
+
+.terminal-white {
+    color: #ffffff;
+}
+
+
+.terminal-muted {
+    color: #777777;
+}
+
+
+.terminal-blue {
+    color: #76b7ff;
+}
+
+
+.terminal-yellow {
+    color: #e8c76b;
+}
+
+
+.terminal-command {
+    color: #ffffff;
+}
+
+
+/* =========================================
+   SCROLLBAR
+========================================= */
+
+.window-content::-webkit-scrollbar,
+.terminal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+
+.window-content::-webkit-scrollbar-track,
+.terminal-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+
+.window-content::-webkit-scrollbar-thumb,
+.terminal-content::-webkit-scrollbar-thumb {
+    background:
+        rgba(255, 255, 255, 0.18);
+
+    border-radius: 10px;
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 700px) {
+
+    .menu-left > span {
+        display: none;
+    }
+
+
+    .desktop-icon {
+        width: 90px;
+    }
+
+
+    .desktop-icon img {
+        width: 56px;
+        height: 56px;
+    }
+
+
+    .desktop-icon span {
+        font-size: 12px;
+    }
+
+
+    .dock {
+        height: 68px;
+
+        gap: 5px;
+
+        padding: 8px 10px;
+    }
+
+
+    .dock-icon {
+        width: 48px;
+        height: 48px;
+    }
+
+
+    .dock-icon img {
+        width: 44px;
+        height: 44px;
+    }
+
+
+    .app-window {
+        width: calc(100vw - 30px);
+
+        height: calc(100vh - 100px);
+    }
+
+
+    .terminal-window {
+        width: calc(100vw - 30px);
+    }
+
+
+    .domain-grid,
+    .contact-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+/* =========================================
+   KERNEL CALENDAR — IOS AGENDA STYLE
+========================================= */
+
+.calendar-window {
+    width: 620px;
+    height: 570px;
+
+    background: rgba(248, 248, 250, 0.96);
+
+    color: #1c1c1e;
+
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+}
+
+
+/* =========================================
+   WINDOW HEADER
+========================================= */
+
+.calendar-window .window-header {
+    background:
+        rgba(235, 235, 240, 0.92);
+
+    border-bottom:
+        1px solid rgba(60, 60, 67, 0.16);
+}
+
+
+.calendar-window .window-title {
+    color: #4a4a4f;
+}
+
+
+/* =========================================
+   CALENDAR CONTENT
+========================================= */
+
+.calendar-content {
+    height: calc(100% - 42px);
+
+    overflow-y: auto;
+
+    background:
+        rgba(248, 248, 250, 0.96);
+}
+
+
+/* =========================================
+   CALENDAR TOP
+========================================= */
+
+.calendar-top {
+    position: sticky;
+
+    top: 0;
+
+    z-index: 5;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 22px 25px 18px;
+
+    background:
+        rgba(248, 248, 250, 0.94);
+
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+
+    border-bottom:
+        1px solid rgba(60, 60, 67, 0.10);
+}
+
+
+.calendar-title {
+    font-size: 25px;
+
+    font-weight: 650;
+
+    letter-spacing: -0.5px;
+
+    color: #1c1c1e;
+}
+
+
+.calendar-subtitle {
+    margin-top: 3px;
+
+    font-size: 12px;
+
+    color: #8e8e93;
+}
+
+
+/* =========================================
+   NAVIGATION
+========================================= */
+
+.calendar-navigation {
+    display: flex;
+
+    gap: 5px;
+}
+
+
+.calendar-nav {
+    width: 34px;
+    height: 34px;
+
+    border: none;
+
+    border-radius: 50%;
+
+    background:
+        rgba(118, 118, 128, 0.12);
+
+    color: #1c1c1e;
+
+    font-size: 25px;
+
+    line-height: 1;
+
+    cursor: pointer;
+
+    transition:
+        background 0.15s ease;
+}
+
+
+.calendar-nav:hover {
+    background:
+        rgba(118, 118, 128, 0.22);
+}
+
+
+/* =========================================
+   EVENT LIST
+========================================= */
+
+.calendar-events-list {
+    padding-bottom: 25px;
+}
+
+
+/* =========================================
+   DATE GROUP
+========================================= */
+
+.calendar-date-group {
+    margin-top: 18px;
+}
+
+
+.calendar-date-heading {
+    padding: 0 25px 7px;
+
+    font-size: 11px;
+
+    font-weight: 650;
+
+    letter-spacing: 0.35px;
+
+    color: #6e6e73;
+
+    text-transform: uppercase;
+}
+
+
+/* =========================================
+   EVENT ROW
+========================================= */
+
+.calendar-event-row {
+    position: relative;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+
+    width: 100%;
+
+    min-height: 66px;
+
+    padding: 9px 25px 9px 28px;
+
+    border: none;
+
+    border-top:
+        1px solid rgba(60, 60, 67, 0.10);
+
+    background: transparent;
+
+    color: #1c1c1e;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    transition:
+        background 0.15s ease;
+}
+
+
+.calendar-event-row:last-child {
+    border-bottom:
+        1px solid rgba(60, 60, 67, 0.10);
+}
+
+
+.calendar-event-row:hover {
+    background:
+        rgba(118, 118, 128, 0.08);
+}
+
+
+/* EVENT COLOR LINE */
+
+.calendar-event-row::before {
+    content: "";
+
+    position: absolute;
+
+    left: 16px;
+
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    width: 4px;
+
+    height: 34px;
+
+    border-radius: 4px;
+
+    background: #af52de;
+}
+
+
+/* =========================================
+   EVENT DATE
+========================================= */
+
+.calendar-event-date {
+    width: 45px;
+
+    flex-shrink: 0;
+
+    text-align: center;
+}
+
+
+.calendar-event-day {
+    display: block;
+
+    font-size: 20px;
+
+    font-weight: 600;
+
+    line-height: 1.1;
+}
+
+
+.calendar-event-weekday {
+    display: block;
+
+    margin-top: 3px;
+
+    font-size: 9px;
+
+    color: #8e8e93;
+
+    text-transform: uppercase;
+}
+
+
+/* =========================================
+   EVENT INFORMATION
+========================================= */
+
+.calendar-event-info {
+    flex: 1;
+
+    min-width: 0;
+}
+
+
+.calendar-event-name {
+    display: block;
+
+    font-size: 15px;
+
+    font-weight: 550;
+
+    color: #1c1c1e;
+}
+
+
+.calendar-event-time {
+    display: block;
+
+    margin-top: 4px;
+
+    font-size: 11px;
+
+    color: #8e8e93;
+}
+
+
+/* =========================================
+   ARROW
+========================================= */
+
+.calendar-event-arrow {
+    font-size: 19px;
+
+    color: #c7c7cc;
+}
+
+
+/* =========================================
+   SELECTED EVENT
+========================================= */
+
+.calendar-event-row.selected {
+    background:
+        rgba(0, 122, 255, 0.08);
+}
+
+
+.calendar-event-row.selected::before {
+    background: #007aff;
+}
+
+
+/* =========================================
+   EVENT DESCRIPTION
+========================================= */
+
+.calendar-event-description {
+    display: none;
+
+    margin:
+        0 25px 8px 88px;
+
+    padding: 14px 16px;
+
+    border-radius: 9px;
+
+    background:
+        rgba(118, 118, 128, 0.08);
+
+    color: #6e6e73;
+
+    font-size: 12px;
+
+    line-height: 1.6;
+}
+
+
+.calendar-event-description.visible {
+    display: block;
+}
+
+
+.calendar-event-description strong {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #1c1c1e;
+
+    font-size: 12px;
+}
+
+
+/* =========================================
+   NO EVENTS
+========================================= */
+
+.calendar-empty {
+    padding: 60px 25px;
+
+    text-align: center;
+
+    color: #8e8e93;
+
+    font-size: 13px;
+}
+
+
+/* =========================================
+   SCROLLBAR
+========================================= */
+
+.calendar-content::-webkit-scrollbar {
+    width: 7px;
+}
+
+
+.calendar-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+
+.calendar-content::-webkit-scrollbar-thumb {
+    background:
+        rgba(0, 0, 0, 0.15);
+
+    border-radius: 10px;
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 700px) {
+
+    .calendar-window {
+        width: calc(100vw - 30px);
+
+        height: calc(100vh - 100px);
+    }
+
+
+    .calendar-top {
+        padding:
+            18px 18px 15px;
+    }
+
+
+    .calendar-title {
+        font-size: 21px;
+    }
+
+
+    .calendar-date-heading {
+        padding-left: 18px;
+        padding-right: 18px;
+    }
+
+
+    .calendar-event-row {
+        padding-left: 21px;
+        padding-right: 18px;
+    }
+
+
+    .calendar-event-description {
+        margin-left: 75px;
+        margin-right: 18px;
+    }
+
+}
