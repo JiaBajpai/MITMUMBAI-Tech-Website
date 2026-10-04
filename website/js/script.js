@@ -3,7 +3,6 @@
 ========================================= */
 
 function updateClock() {
-
     const clock = document.getElementById("clock");
 
     if (!clock) {
@@ -12,20 +11,13 @@ function updateClock() {
 
     const now = new Date();
 
-    const hours = String(
-        now.getHours()
-    ).padStart(2, "0");
-
-    const minutes = String(
-        now.getMinutes()
-    ).padStart(2, "0");
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
 
     clock.textContent = `${hours}:${minutes}`;
 }
 
-
 updateClock();
-
 setInterval(updateClock, 1000);
 
 
@@ -34,9 +26,7 @@ setInterval(updateClock, 1000);
 ========================================= */
 
 const desktop = document.querySelector(".desktop");
-
-const folders =
-    document.querySelectorAll(".desktop-icon");
+const folders = document.querySelectorAll(".desktop-icon");
 
 
 /* =========================================
@@ -44,346 +34,25 @@ const folders =
 ========================================= */
 
 const defaultPositions = {
-
-    "about-folder": {
-        x: window.innerWidth - 180,
-        y: 70
-    },
-
-    "domains-folder": {
-        x: window.innerWidth - 180,
-        y: 180
-    },
-
-    "events-folder": {
-        x: window.innerWidth - 180,
-        y: 290
-    },
-
-    "contact-folder": {
-        x: window.innerWidth - 180,
-        y: 400
-    }
-
+    "about-folder": { x: 20, y: 55 },
+    "domains-folder": { x: 20, y: 165 },
+    "contact-folder": { x: 20, y: 275 }
 };
 
-
-/* =========================================
-   SAVED POSITIONS
-========================================= */
-
-function getSavedPositions() {
-
-    const saved =
-        localStorage.getItem(
-            "kernel-folder-positions"
-        );
-
-    if (!saved) {
-        return {};
-    }
-
-    try {
-
-        return JSON.parse(saved);
-
-    } catch (error) {
-
-        console.error(
-            "Could not load folder positions:",
-            error
-        );
-
-        return {};
-    }
-}
-
-
-function savePositions() {
-
-    const positions = {};
-
-    folders.forEach(folder => {
-
-        positions[folder.id] = {
-
-            x: parseFloat(folder.style.left),
-
-            y: parseFloat(folder.style.top)
-
-        };
-
-    });
-
-
-    localStorage.setItem(
-        "kernel-folder-positions",
-        JSON.stringify(positions)
-    );
-}
-
-
-/* =========================================
-   POSITION FOLDERS
-========================================= */
-
 function positionFolders() {
-
-    const savedPositions =
-        getSavedPositions();
-
-
     folders.forEach(folder => {
+        const position = defaultPositions[folder.id];
 
-        const saved =
-            savedPositions[folder.id];
-
-        const defaultPosition =
-            defaultPositions[folder.id];
-
-
-        if (saved) {
-
-            folder.style.left =
-                `${saved.x}px`;
-
-            folder.style.top =
-                `${saved.y}px`;
-
+        if (!position) {
+            return;
         }
 
-        else if (defaultPosition) {
-
-            folder.style.left =
-                `${defaultPosition.x}px`;
-
-            folder.style.top =
-                `${defaultPosition.y}px`;
-
-        }
-
+        folder.style.left = `${position.x}px`;
+        folder.style.top = `${position.y}px`;
     });
-
 }
-
-
-/* =========================================
-   KEEP FOLDER INSIDE DESKTOP
-========================================= */
-
-function keepInsideDesktop(
-    folder,
-    x,
-    y
-) {
-
-    const desktopRect =
-        desktop.getBoundingClientRect();
-
-    const folderRect =
-        folder.getBoundingClientRect();
-
-
-    const maxX =
-        desktopRect.width -
-        folderRect.width;
-
-
-    const maxY =
-        desktopRect.height -
-        folderRect.height;
-
-
-    const minY = 40;
-
-
-    x = Math.max(
-        0,
-        Math.min(x, maxX)
-    );
-
-
-    y = Math.max(
-        minY,
-        Math.min(y, maxY)
-    );
-
-
-    return {
-        x,
-        y
-    };
-
-}
-
-
-/* =========================================
-   MAKE FOLDER DRAGGABLE
-========================================= */
-
-function makeDraggable(folder) {
-
-    let isDragging = false;
-
-    let offsetX = 0;
-    let offsetY = 0;
-
-
-    /* POINTER DOWN */
-
-    folder.addEventListener(
-        "pointerdown",
-        function (event) {
-
-            if (
-                event.button !== 0 &&
-                event.pointerType === "mouse"
-            ) {
-                return;
-            }
-
-
-            isDragging = true;
-
-
-            folder.setPointerCapture(
-                event.pointerId
-            );
-
-
-            folder.classList.add(
-                "dragging"
-            );
-
-
-            const rect =
-                folder.getBoundingClientRect();
-
-
-            offsetX =
-                event.clientX -
-                rect.left;
-
-
-            offsetY =
-                event.clientY -
-                rect.top;
-
-        }
-    );
-
-
-    /* POINTER MOVE */
-
-    folder.addEventListener(
-        "pointermove",
-        function (event) {
-
-            if (!isDragging) {
-                return;
-            }
-
-
-            const desktopRect =
-                desktop.getBoundingClientRect();
-
-
-            let x =
-                event.clientX -
-                desktopRect.left -
-                offsetX;
-
-
-            let y =
-                event.clientY -
-                desktopRect.top -
-                offsetY;
-
-
-            const position =
-                keepInsideDesktop(
-                    folder,
-                    x,
-                    y
-                );
-
-
-            folder.style.left =
-                `${position.x}px`;
-
-            folder.style.top =
-                `${position.y}px`;
-
-        }
-    );
-
-
-    /* POINTER UP */
-
-    folder.addEventListener(
-        "pointerup",
-        function (event) {
-
-            if (!isDragging) {
-                return;
-            }
-
-
-            isDragging = false;
-
-
-            folder.classList.remove(
-                "dragging"
-            );
-
-
-            try {
-
-                folder.releasePointerCapture(
-                    event.pointerId
-                );
-
-            } catch (error) {
-                // Pointer already released.
-            }
-
-
-            savePositions();
-
-        }
-    );
-
-
-    /* POINTER CANCEL */
-
-    folder.addEventListener(
-        "pointercancel",
-        function () {
-
-            isDragging = false;
-
-            folder.classList.remove(
-                "dragging"
-            );
-
-        }
-    );
-
-}
-
-
-/* =========================================
-   INITIALIZE FOLDERS
-========================================= */
 
 positionFolders();
-
-
-folders.forEach(folder => {
-
-    makeDraggable(folder);
-
-});
 
 
 /* =========================================
@@ -391,17 +60,11 @@ folders.forEach(folder => {
 ========================================= */
 
 const folderWindows = {
-
     "about-folder": "about-window",
-
     "domains-folder": "domains-window",
-
     "events-folder": "events-window",
-
     "contact-folder": "contact-window"
-
 };
-
 
 let highestZIndex = 100;
 
@@ -411,29 +74,18 @@ let highestZIndex = 100;
 ========================================= */
 
 function openWindow(windowId) {
-
-    const windowElement =
-        document.getElementById(windowId);
-
+    const windowElement = document.getElementById(windowId);
 
     if (!windowElement) {
         return;
     }
 
-
     windowElement.style.display = "block";
 
-
     highestZIndex++;
+    windowElement.style.zIndex = highestZIndex;
 
-    windowElement.style.zIndex =
-        highestZIndex;
-
-
-    windowElement.classList.remove(
-        "minimized"
-    );
-
+    windowElement.classList.remove("minimized");
 }
 
 
@@ -442,9 +94,7 @@ function openWindow(windowId) {
 ========================================= */
 
 function closeWindow(windowElement) {
-
     windowElement.style.display = "none";
-
 }
 
 
@@ -452,28 +102,17 @@ function closeWindow(windowElement) {
    FOLDER DOUBLE CLICK
 ========================================= */
 
-Object.entries(folderWindows)
-    .forEach(([folderId, windowId]) => {
+Object.entries(folderWindows).forEach(([folderId, windowId]) => {
+    const folder = document.getElementById(folderId);
 
-        const folder =
-            document.getElementById(folderId);
+    if (!folder) {
+        return;
+    }
 
-
-        if (!folder) {
-            return;
-        }
-
-
-        folder.addEventListener(
-            "dblclick",
-            function () {
-
-                openWindow(windowId);
-
-            }
-        );
-
+    folder.addEventListener("dblclick", function () {
+        openWindow(windowId);
     });
+});
 
 
 /* =========================================
@@ -481,29 +120,13 @@ Object.entries(folderWindows)
 ========================================= */
 
 folders.forEach(folder => {
+    folder.addEventListener("click", function () {
+        folders.forEach(otherFolder => {
+            otherFolder.classList.remove("selected");
+        });
 
-    folder.addEventListener(
-        "click",
-        function () {
-
-            folders.forEach(
-                otherFolder => {
-
-                    otherFolder.classList.remove(
-                        "selected"
-                    );
-
-                }
-            );
-
-
-            folder.classList.add(
-                "selected"
-            );
-
-        }
-    );
-
+        folder.classList.add("selected");
+    });
 });
 
 
@@ -511,313 +134,202 @@ folders.forEach(folder => {
    WINDOW FOCUS
 ========================================= */
 
-document
-    .querySelectorAll(".app-window")
-    .forEach(windowElement => {
+document.querySelectorAll(".app-window").forEach(windowElement => {
+    windowElement.addEventListener("mousedown", function () {
+        highestZIndex++;
 
-        windowElement.addEventListener(
-            "mousedown",
-            function () {
-
-                highestZIndex++;
-
-                windowElement.style.zIndex =
-                    highestZIndex;
-
-            }
-        );
-
+        windowElement.style.zIndex = highestZIndex;
     });
+});
 
 
 /* =========================================
    CLOSE BUTTONS
 ========================================= */
 
-document
-    .querySelectorAll(".app-window")
-    .forEach(windowElement => {
+document.querySelectorAll(".app-window").forEach(windowElement => {
+    const closeButton =
+        windowElement.querySelector(".window-btn.close");
 
-        const closeButton =
-            windowElement.querySelector(
-                ".window-btn.close"
-            );
+    closeButton.addEventListener("click", function (event) {
+        event.stopPropagation();
 
-
-        closeButton.addEventListener(
-            "click",
-            function (event) {
-
-                event.stopPropagation();
-
-                closeWindow(windowElement);
-
-            }
-        );
-
+        closeWindow(windowElement);
     });
+});
 
 
 /* =========================================
    MINIMIZE BUTTONS
 ========================================= */
 
-document
-    .querySelectorAll(".app-window")
-    .forEach(windowElement => {
+document.querySelectorAll(".app-window").forEach(windowElement => {
+    const minimizeButton =
+        windowElement.querySelector(".window-btn.minimize");
 
-        const minimizeButton =
-            windowElement.querySelector(
-                ".window-btn.minimize"
-            );
+    minimizeButton.addEventListener("click", function (event) {
+        event.stopPropagation();
 
-
-        minimizeButton.addEventListener(
-            "click",
-            function (event) {
-
-                event.stopPropagation();
-
-                windowElement.style.display =
-                    "none";
-
-            }
-        );
-
+        windowElement.style.display = "none";
     });
+});
 
 
 /* =========================================
    MAXIMIZE BUTTONS
 ========================================= */
 
-document
-    .querySelectorAll(".app-window")
-    .forEach(windowElement => {
+document.querySelectorAll(".app-window").forEach(windowElement => {
+    const maximizeButton =
+        windowElement.querySelector(".window-btn.maximize");
 
-        const maximizeButton =
-            windowElement.querySelector(
-                ".window-btn.maximize"
-            );
+    maximizeButton.addEventListener("click", function (event) {
+        event.stopPropagation();
 
+        if (windowElement.classList.contains("maximized")) {
+            windowElement.classList.remove("maximized");
 
-        maximizeButton.addEventListener(
-            "click",
-            function (event) {
+            windowElement.style.width = "";
+            windowElement.style.height = "";
 
-                event.stopPropagation();
+            windowElement.style.left = "";
+            windowElement.style.top = "";
 
+            windowElement.style.transform =
+                "translate(-50%, -50%)";
+        } else {
+            windowElement.classList.add("maximized");
 
-                if (
-                    windowElement.classList.contains(
-                        "maximized"
-                    )
-                ) {
+            windowElement.style.width =
+                "calc(100vw - 40px)";
 
-                    windowElement.classList.remove(
-                        "maximized"
-                    );
+            windowElement.style.height =
+                "calc(100vh - 70px)";
 
+            windowElement.style.left = "50%";
+            windowElement.style.top = "50%";
 
-                    windowElement.style.width = "";
-                    windowElement.style.height = "";
-
-                    windowElement.style.left = "";
-                    windowElement.style.top = "";
-
-                    windowElement.style.transform =
-                        "translate(-50%, -50%)";
-
-                }
-
-                else {
-
-                    windowElement.classList.add(
-                        "maximized"
-                    );
-
-
-                    windowElement.style.width =
-                        "calc(100vw - 40px)";
-
-                    windowElement.style.height =
-                        "calc(100vh - 70px)";
-
-                    windowElement.style.left =
-                        "50%";
-
-                    windowElement.style.top =
-                        "50%";
-
-                    windowElement.style.transform =
-                        "translate(-50%, -50%)";
-
-                }
-
-            }
-        );
-
+            windowElement.style.transform =
+                "translate(-50%, -50%)";
+        }
     });
+});
 
 
 /* =========================================
    WINDOW DRAGGING
 ========================================= */
 
-document
-    .querySelectorAll(".app-window")
-    .forEach(windowElement => {
+document.querySelectorAll(".app-window").forEach(windowElement => {
+    const header =
+        windowElement.querySelector(".window-header");
 
-        const header =
-            windowElement.querySelector(
-                ".window-header"
-            );
+    let dragging = false;
+    let offsetX = 0;
+    let offsetY = 0;
 
+    header.addEventListener("pointerdown", function (event) {
+        if (
+            event.target.classList.contains("window-btn")
+        ) {
+            return;
+        }
 
-        let dragging = false;
+        if (
+            windowElement.classList.contains("maximized")
+        ) {
+            return;
+        }
 
-        let offsetX = 0;
-        let offsetY = 0;
+        dragging = true;
 
+        highestZIndex++;
+        windowElement.style.zIndex = highestZIndex;
 
-        header.addEventListener(
-            "pointerdown",
-            function (event) {
+        const rect =
+            windowElement.getBoundingClientRect();
 
-                if (
-                    event.target.classList.contains(
-                        "window-btn"
-                    )
-                ) {
-                    return;
-                }
+        offsetX =
+            event.clientX - rect.left;
 
+        offsetY =
+            event.clientY - rect.top;
 
-                if (
-                    windowElement.classList.contains(
-                        "maximized"
-                    )
-                ) {
-                    return;
-                }
-
-
-                dragging = true;
-
-
-                highestZIndex++;
-
-                windowElement.style.zIndex =
-                    highestZIndex;
-
-
-                const rect =
-                    windowElement.getBoundingClientRect();
-
-
-                offsetX =
-                    event.clientX -
-                    rect.left;
-
-
-                offsetY =
-                    event.clientY -
-                    rect.top;
-
-
-                header.setPointerCapture(
-                    event.pointerId
-                );
-
-            }
-        );
-
-
-        header.addEventListener(
-            "pointermove",
-            function (event) {
-
-                if (!dragging) {
-                    return;
-                }
-
-
-                const desktopRect =
-                    desktop.getBoundingClientRect();
-
-
-                let x =
-                    event.clientX -
-                    desktopRect.left -
-                    offsetX;
-
-
-                let y =
-                    event.clientY -
-                    desktopRect.top -
-                    offsetY;
-
-
-                const rect =
-                    windowElement.getBoundingClientRect();
-
-
-                const maxX =
-                    desktopRect.width -
-                    rect.width;
-
-
-                const maxY =
-                    desktopRect.height -
-                    rect.height;
-
-
-                x = Math.max(
-                    0,
-                    Math.min(x, maxX)
-                );
-
-
-                y = Math.max(
-                    32,
-                    Math.min(y, maxY)
-                );
-
-
-                windowElement.style.left =
-                    `${x}px`;
-
-                windowElement.style.top =
-                    `${y}px`;
-
-                windowElement.style.transform =
-                    "none";
-
-            }
-        );
-
-
-        header.addEventListener(
-            "pointerup",
-            function (event) {
-
-                dragging = false;
-
-
-                try {
-
-                    header.releasePointerCapture(
-                        event.pointerId
-                    );
-
-                } catch (error) {
-                    // Pointer already released.
-                }
-
-            }
-        );
-
+        header.setPointerCapture(event.pointerId);
     });
+
+    header.addEventListener("pointermove", function (event) {
+        if (!dragging) {
+            return;
+        }
+
+        const desktopRect =
+            desktop.getBoundingClientRect();
+
+        let x =
+            event.clientX -
+            desktopRect.left -
+            offsetX;
+
+        let y =
+            event.clientY -
+            desktopRect.top -
+            offsetY;
+
+        const rect =
+            windowElement.getBoundingClientRect();
+
+        const maxX =
+            desktopRect.width -
+            rect.width;
+
+        const maxY =
+            desktopRect.height -
+            rect.height;
+
+        x = Math.max(
+            0,
+            Math.min(x, maxX)
+        );
+
+        y = Math.max(
+            32,
+            Math.min(y, maxY)
+        );
+
+        windowElement.style.left = `${x}px`;
+        windowElement.style.top = `${y}px`;
+
+        windowElement.style.transform = "none";
+    });
+
+    header.addEventListener("pointerup", function (event) {
+        dragging = false;
+
+        try {
+            header.releasePointerCapture(event.pointerId);
+        } catch (error) {
+            // Pointer already released.
+        }
+    });
+});
+
+
+/* =========================================
+   EVENTS DOCK BUTTON
+========================================= */
+
+const eventsButton =
+    document.getElementById("events");
+
+if (eventsButton) {
+    eventsButton.addEventListener("click", function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        openWindow("events-window");
+    });
+}
 
 
 /* =========================================
@@ -840,134 +352,140 @@ const terminalOutput =
     document.getElementById("terminal-output");
 
 
-/* OPEN TERMINAL */
+/* =========================================
+   TERMINAL OPEN
+========================================= */
 
 if (terminalButton) {
+    terminalButton.addEventListener("click", function () {
+        openWindow("terminal-window");
 
-    terminalButton.addEventListener(
-        "click",
-        function () {
-
-            openWindow("terminal-window");
-
-            setTimeout(() => {
-
+        setTimeout(function () {
+            if (terminalInput) {
                 terminalInput.focus();
-
-            }, 50);
-
-        }
-    );
-
+            }
+        }, 50);
+    });
 }
 
 
 /* =========================================
-   TERMINAL OUTPUT
+   TERMINAL COMMANDS
 ========================================= */
 
-function printTerminal(
-    text,
-    className = ""
-) {
-
-    const line =
-        document.createElement("div");
-
-
-    if (className) {
-
-        line.className =
-            className;
-
+function printTerminal(text, className = "") {
+    if (!terminalOutput) {
+        return;
     }
 
+    const line = document.createElement("div");
+
+    if (className) {
+        line.className = className;
+    }
 
     line.innerHTML = text;
 
-
     terminalOutput.appendChild(line);
-
 
     terminalOutput.scrollTop =
         terminalOutput.scrollHeight;
-
 }
 
 
-/* =========================================
-   TERMINAL COMMAND
-========================================= */
-
 function runCommand(command) {
+    if (!terminalOutput) {
+        return;
+    }
 
-    const cleanCommand =
-        command.trim().toLowerCase();
+    command = command.trim();
 
+    if (!command) {
+        return;
+    }
 
-    if (!cleanCommand) {
+    printTerminal(
+        `<span class="terminal-green">guest@kernel</span>:<span class="terminal-blue">~</span>$ ${escapeHtml(command)}`
+    );
+
+    const lowerCommand =
+        command.toLowerCase();
+
+    /* HELP */
+
+    if (lowerCommand === "help") {
+        printTerminal(
+            `<span class="terminal-white">Available commands:</span>`
+        );
+
+        printTerminal(
+            `<span class="terminal-white">help</span> - Show available commands`
+        );
+
+        printTerminal(
+            `<span class="terminal-white">clear</span> - Clear terminal`
+        );
+
+        printTerminal(
+            `<span class="terminal-white">date</span> - Show current date`
+        );
+
+        printTerminal(
+            `<span class="terminal-white">time</span> - Show current time`
+        );
+
+        printTerminal(
+            `<span class="terminal-white">whoami</span> - Show current user`
+        );
+
+        printTerminal(
+            `<span class="terminal-white">about</span> - About MIT TECH KERNEL`
+        );
+
+        printTerminal(
+            `<span class="terminal-white">events</span> - Open events`
+        );
+
         return;
     }
 
 
-    /* Show command */
+    /* CLEAR */
 
-    printTerminal(
-        `<span class="terminal-prompt">guest@kernel:~$</span> <span class="terminal-command">${escapeHtml(command)}</span>`
-    );
+    if (lowerCommand === "clear") {
+        terminalOutput.innerHTML = "";
+
+        return;
+    }
 
 
-    /* HELP */
+    /* DATE */
 
-    if (cleanCommand === "help") {
-
+    if (lowerCommand === "date") {
         printTerminal(
-            "Available commands:",
-            "terminal-blue"
+            new Date().toLocaleDateString()
         );
 
+        return;
+    }
+
+
+    /* TIME */
+
+    if (lowerCommand === "time") {
         printTerminal(
-            "  help       Show available commands"
+            new Date().toLocaleTimeString()
         );
 
-        printTerminal(
-            "  about      Open About Us"
-        );
+        return;
+    }
 
-        printTerminal(
-            "  domains    Open Technical Domains"
-        );
 
-        printTerminal(
-            "  events     Open Events"
-        );
+    /* WHOAMI */
 
+    if (lowerCommand === "whoami") {
         printTerminal(
-            "  contact    Open Contact Us"
-        );
-
-        printTerminal(
-            "  whoami     Display current user"
-        );
-
-        printTerminal(
-            "  date       Display current date"
-        );
-
-        printTerminal(
-            "  ls         List desktop applications"
-        );
-
-        printTerminal(
-            "  neofetch   Display KERNEL system information"
-        );
-
-        printTerminal(
-            "  kernel     Open KERNEL member portal"
-        );
-
-        printTerminal(
-            "  clear      Clear terminal"
+            "guest"
         );
 
         return;
@@ -976,29 +494,14 @@ function runCommand(command) {
 
     /* ABOUT */
 
-    if (cleanCommand === "about") {
-
+    if (lowerCommand === "about") {
         printTerminal(
-            "Opening ABOUT US...",
-            "terminal-muted"
+            "MIT TECH KERNEL"
         );
 
-        openWindow("about-window");
-
-        return;
-    }
-
-
-    /* DOMAINS */
-
-    if (cleanCommand === "domains") {
-
         printTerminal(
-            "Opening DOMAINS...",
-            "terminal-muted"
+            "Technical Club of MIT Mumbai."
         );
-
-        openWindow("domains-window");
 
         return;
     }
@@ -1006,179 +509,8 @@ function runCommand(command) {
 
     /* EVENTS */
 
-    if (cleanCommand === "events") {
-
-        printTerminal(
-            "Opening EVENTS...",
-            "terminal-muted"
-        );
-
+    if (lowerCommand === "events") {
         openWindow("events-window");
-
-        return;
-    }
-
-
-    /* CONTACT */
-
-    if (
-        cleanCommand === "contact" ||
-        cleanCommand === "contact us"
-    ) {
-
-        printTerminal(
-            "Opening CONTACT US...",
-            "terminal-muted"
-        );
-
-        openWindow("contact-window");
-
-        return;
-    }
-
-
-    /* WHOAMI */
-
-    if (cleanCommand === "whoami") {
-
-        printTerminal(
-            "guest",
-            "terminal-green"
-        );
-
-        return;
-    }
-
-
-    /* DATE */
-
-    if (cleanCommand === "date") {
-
-        printTerminal(
-            new Date().toString(),
-            "terminal-muted"
-        );
-
-        return;
-    }
-
-
-    /* LS */
-
-    if (cleanCommand === "ls") {
-
-        printTerminal(
-            "ABOUT_US/",
-            "terminal-blue"
-        );
-
-        printTerminal(
-            "DOMAINS/",
-            "terminal-blue"
-        );
-
-        printTerminal(
-            "EVENTS/",
-            "terminal-blue"
-        );
-
-        printTerminal(
-            "CONTACT_US/",
-            "terminal-blue"
-        );
-
-        printTerminal(
-            "KERNEL",
-            "terminal-green"
-        );
-
-        return;
-    }
-
-
-    /* NEOFETCH */
-
-    if (cleanCommand === "neofetch") {
-
-        printTerminal(
-            "       ██╗  ██╗███████╗██████╗ ███╗   ██╗███████╗██╗",
-            "terminal-green"
-        );
-
-        printTerminal(
-            "       ██║ ██╔╝██╔════╝██╔══██╗████╗  ██║██╔════╝██║"
-        );
-
-        printTerminal(
-            "       █████╔╝ █████╗  ██████╔╝██╔██╗ ██║█████╗  ██║"
-        );
-
-        printTerminal(
-            "       ██╔═██╗ ██╔══╝  ██╔══██╗██║╚██╗██║██╔══╝  ██║"
-        );
-
-        printTerminal(
-            "       ██║  ██╗███████╗██║  ██║██║ ╚████║███████╗██║"
-        );
-
-        printTerminal(
-            "       ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝"
-        );
-
-        printTerminal("");
-
-        printTerminal(
-            "OS        KERNEL OS",
-            "terminal-blue"
-        );
-
-        printTerminal(
-            "VERSION   1.0.0"
-        );
-
-        printTerminal(
-            "USER      guest"
-        );
-
-        printTerminal(
-            "DOMAIN    MIT TECH KERNEL"
-        );
-
-        printTerminal(
-            "STATUS    ONLINE",
-            "terminal-green"
-        );
-
-        return;
-    }
-
-
-    /* KERNEL */
-
-    if (cleanCommand === "kernel") {
-
-        printTerminal(
-            "Launching KERNEL member portal...",
-            "terminal-yellow"
-        );
-
-
-        setTimeout(() => {
-
-            window.location.href = "/login";
-
-        }, 500);
-
-
-        return;
-    }
-
-
-    /* CLEAR */
-
-    if (cleanCommand === "clear") {
-
-        terminalOutput.innerHTML = "";
 
         return;
     }
@@ -1194,7 +526,6 @@ function runCommand(command) {
     printTerminal(
         `Type <span class="terminal-white">help</span> for available commands.`
     );
-
 }
 
 
@@ -1203,14 +534,12 @@ function runCommand(command) {
 ========================================= */
 
 function escapeHtml(text) {
-
     const div =
         document.createElement("div");
 
     div.textContent = text;
 
     return div.innerHTML;
-
 }
 
 
@@ -1219,26 +548,19 @@ function escapeHtml(text) {
 ========================================= */
 
 if (terminalForm) {
-
     terminalForm.addEventListener(
         "submit",
         function (event) {
-
             event.preventDefault();
-
 
             const command =
                 terminalInput.value;
 
-
             runCommand(command);
 
-
             terminalInput.value = "";
-
         }
     );
-
 }
 
 
@@ -1247,16 +569,14 @@ if (terminalForm) {
 ========================================= */
 
 if (terminalWindow) {
-
     terminalWindow.addEventListener(
         "click",
         function () {
-
-            terminalInput.focus();
-
+            if (terminalInput) {
+                terminalInput.focus();
+            }
         }
     );
-
 }
 
 
@@ -1264,45 +584,11 @@ if (terminalWindow) {
    WINDOW RESIZE
 ========================================= */
 
-window.addEventListener(
-    "resize",
-    function () {
-
-        folders.forEach(folder => {
-
-            const rect =
-                folder.getBoundingClientRect();
+window.addEventListener("resize", function () {
+    positionFolders();
+});
 
 
-            const desktopRect =
-                desktop.getBoundingClientRect();
-
-
-            const position =
-                keepInsideDesktop(
-                    folder,
-
-                    rect.left -
-                    desktopRect.left,
-
-                    rect.top -
-                    desktopRect.top
-                );
-
-
-            folder.style.left =
-                `${position.x}px`;
-
-            folder.style.top =
-                `${position.y}px`;
-
-        });
-
-
-        savePositions();
-
-    }
-);
 /* =========================================
    KERNEL CALENDAR — IOS AGENDA
 ========================================= */
@@ -1325,42 +611,29 @@ const nextMonthButton =
 ========================================= */
 
 const calendarEvents = [
-
     {
         date: "2026-09-04",
-
         title: "SIH Internal Hackathon",
-
         description:
             "College internal round of the Smart India Hackathon (SIH), where participating teams develop and present their solutions for selection to the next stage.",
-
         time: "all-day"
     },
-
 
     {
         date: "2026-09-30",
-
         title: "Engineers' Day",
-
         description:
             "A technical celebration featuring six events: BuildX, Chess, Ideathon, RapidResearch, Debate and BuildX Debugging.",
-
         time: "all-day"
     },
 
-
     {
         date: "2026-10-10",
-
         title: "Techsphere",
-
         description:
             "An internal showcase for second-year students to present and demonstrate their semester mini projects.",
-
         time: "all-day"
     }
-
 ];
 
 
@@ -1377,7 +650,6 @@ let calendarMonthDate =
 ========================================= */
 
 function getMonthName(date) {
-
     return date.toLocaleDateString(
         "en-US",
         {
@@ -1385,7 +657,6 @@ function getMonthName(date) {
             year: "numeric"
         }
     );
-
 }
 
 
@@ -1394,22 +665,17 @@ function getMonthName(date) {
 ========================================= */
 
 function parseCalendarDate(dateString) {
-
     const [
         year,
         month,
         day
-    ] = dateString
-        .split("-")
-        .map(Number);
-
+    ] = dateString.split("-").map(Number);
 
     return new Date(
         year,
         month - 1,
         day
     );
-
 }
 
 
@@ -1418,41 +684,31 @@ function parseCalendarDate(dateString) {
 ========================================= */
 
 function getEventDay(dateString) {
-
-    return parseCalendarDate(
-        dateString
-    ).getDate();
-
+    return parseCalendarDate(dateString).getDate();
 }
 
 
 function getEventWeekday(dateString) {
-
-    return parseCalendarDate(
-        dateString
-    ).toLocaleDateString(
-        "en-US",
-        {
-            weekday: "short"
-        }
-    );
-
+    return parseCalendarDate(dateString)
+        .toLocaleDateString(
+            "en-US",
+            {
+                weekday: "short"
+            }
+        );
 }
 
 
 function getEventHeading(dateString) {
-
-    return parseCalendarDate(
-        dateString
-    ).toLocaleDateString(
-        "en-US",
-        {
-            weekday: "long",
-            month: "short",
-            day: "numeric"
-        }
-    );
-
+    return parseCalendarDate(dateString)
+        .toLocaleDateString(
+            "en-US",
+            {
+                weekday: "long",
+                month: "short",
+                day: "numeric"
+            }
+        );
 }
 
 
@@ -1461,7 +717,6 @@ function getEventHeading(dateString) {
 ========================================= */
 
 function renderCalendarEvents() {
-
     if (
         !calendarTitle ||
         !calendarEventsList
@@ -1469,50 +724,37 @@ function renderCalendarEvents() {
         return;
     }
 
-
     const year =
         calendarMonthDate.getFullYear();
 
     const month =
         calendarMonthDate.getMonth();
 
-
     /* Title */
 
     calendarTitle.textContent =
-        getMonthName(
-            calendarMonthDate
-        );
-
+        getMonthName(calendarMonthDate);
 
     /* Clear */
 
     calendarEventsList.innerHTML = "";
 
-
     /* Filter events for current month */
 
     const monthEvents =
         calendarEvents.filter(event => {
-
             const date =
-                parseCalendarDate(
-                    event.date
-                );
-
+                parseCalendarDate(event.date);
 
             return (
                 date.getFullYear() === year &&
                 date.getMonth() === month
             );
-
         });
-
 
     /* No events */
 
     if (monthEvents.length === 0) {
-
         calendarEventsList.innerHTML = `
             <div class="calendar-empty">
                 No MIT TECH KERNEL events this month.
@@ -1522,58 +764,40 @@ function renderCalendarEvents() {
         return;
     }
 
-
-    /* =====================================
-       CREATE DATE GROUPS
-    ====================================== */
+    /* CREATE DATE GROUPS */
 
     monthEvents.forEach(event => {
-
         const dateGroup =
             document.createElement("div");
 
-
         dateGroup.className =
             "calendar-date-group";
-
 
         /* Date heading */
 
         const heading =
             document.createElement("div");
 
-
         heading.className =
             "calendar-date-heading";
 
-
         heading.textContent =
-            getEventHeading(
-                event.date
-            );
+            getEventHeading(event.date);
 
-
-        dateGroup.appendChild(
-            heading
-        );
-
+        dateGroup.appendChild(heading);
 
         /* Event row */
 
         const eventRow =
             document.createElement("button");
 
-
         eventRow.type = "button";
 
         eventRow.className =
             "calendar-event-row";
 
-
         eventRow.innerHTML = `
-
             <div class="calendar-event-date">
-
                 <span class="calendar-event-day">
                     ${getEventDay(event.date)}
                 </span>
@@ -1581,12 +805,9 @@ function renderCalendarEvents() {
                 <span class="calendar-event-weekday">
                     ${getEventWeekday(event.date)}
                 </span>
-
             </div>
 
-
             <div class="calendar-event-info">
-
                 <span class="calendar-event-name">
                     ${event.title}
                 </span>
@@ -1594,109 +815,63 @@ function renderCalendarEvents() {
                 <span class="calendar-event-time">
                     ${event.time}
                 </span>
-
             </div>
-
 
             <span class="calendar-event-arrow">
                 ›
             </span>
-
         `;
-
 
         /* Description */
 
         const description =
             document.createElement("div");
 
-
         description.className =
             "calendar-event-description";
-
 
         description.innerHTML = `
             <strong>${event.title}</strong>
             ${event.description}
         `;
 
-
-        /* =================================
-           CLICK EVENT
-        ================================== */
+        /* EVENT CLICK */
 
         eventRow.addEventListener(
             "click",
             function () {
-
                 const alreadySelected =
-                    eventRow.classList.contains(
-                        "selected"
-                    );
-
+                    eventRow.classList.contains("selected");
 
                 /* Close everything */
 
                 document
-                    .querySelectorAll(
-                        ".calendar-event-row"
-                    )
+                    .querySelectorAll(".calendar-event-row")
                     .forEach(row => {
-
-                        row.classList.remove(
-                            "selected"
-                        );
-
+                        row.classList.remove("selected");
                     });
-
 
                 document
-                    .querySelectorAll(
-                        ".calendar-event-description"
-                    )
+                    .querySelectorAll(".calendar-event-description")
                     .forEach(desc => {
-
-                        desc.classList.remove(
-                            "visible"
-                        );
-
+                        desc.classList.remove("visible");
                     });
-
 
                 /* Open selected */
 
                 if (!alreadySelected) {
+                    eventRow.classList.add("selected");
 
-                    eventRow.classList.add(
-                        "selected"
-                    );
-
-                    description.classList.add(
-                        "visible"
-                    );
-
+                    description.classList.add("visible");
                 }
-
             }
         );
 
+        dateGroup.appendChild(eventRow);
+        dateGroup.appendChild(description);
 
-        dateGroup.appendChild(
-            eventRow
-        );
-
-
-        dateGroup.appendChild(
-            description
-        );
-
-
-        calendarEventsList.appendChild(
-            dateGroup
-        );
-
+        calendarEventsList.appendChild(dateGroup);
     });
-
 }
 
 
@@ -1705,21 +880,16 @@ function renderCalendarEvents() {
 ========================================= */
 
 if (previousMonthButton) {
-
     previousMonthButton.addEventListener(
         "click",
         function () {
-
             calendarMonthDate.setMonth(
                 calendarMonthDate.getMonth() - 1
             );
 
-
             renderCalendarEvents();
-
         }
     );
-
 }
 
 
@@ -1728,21 +898,16 @@ if (previousMonthButton) {
 ========================================= */
 
 if (nextMonthButton) {
-
     nextMonthButton.addEventListener(
         "click",
         function () {
-
             calendarMonthDate.setMonth(
                 calendarMonthDate.getMonth() + 1
             );
 
-
             renderCalendarEvents();
-
         }
     );
-
 }
 
 
