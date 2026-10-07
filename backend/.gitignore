@@ -1,0 +1,70 @@
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# IDE - IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# IDE - VS Code
+.vscode/
+*.swp
+*.swo
+
+# IDE - Vim
+*~
+*.swp
+*.swo
+*.swn
+*.bak
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Build output
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+hs_err_pid*
+
+# Logs
+*.log
+logs/
+
+# Docker
+docker-compose.override.yml
+
+# Spring Boot
+spring-boot-actuator-*.json
+
+# Test reports
+surefire-reports/
+failsafe-reports/
+
+# Coverage
+jacoco.exec
+*.ec
+
+# Misc
+*.tmp
+*.temp
+.cache/
