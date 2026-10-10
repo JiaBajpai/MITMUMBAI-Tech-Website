@@ -1,0 +1,27 @@
+package com.mittechkernel.backend.modules.user.controller;
+
+import com.mittechkernel.backend.common.response.ApiResponse;
+import com.mittechkernel.backend.modules.user.dashboard.DashboardResponse;
+import com.mittechkernel.backend.modules.user.dashboard.DashboardService;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/v1/me/dashboard")
+@PreAuthorize("isAuthenticated()")
+public class DashboardController {
+    private final DashboardService dashboardService;
+
+    public DashboardController(DashboardService dashboardService) {
+        this.dashboardService = dashboardService;
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<DashboardResponse>> getMyDashboard(HttpServletRequest request) {
+        return ResponseEntity.ok(ApiResponse.success(dashboardService.getMyDashboard(), request));
+    }
+}

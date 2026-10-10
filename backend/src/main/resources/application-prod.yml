@@ -1,25 +1,68 @@
 spring:
+  flyway:
+    locations: classpath:db/migration-production
+    baseline-on-migrate: false
+    clean-disabled: true
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+    hikari:
+      data-source-properties:
+        sslmode: ${DATABASE_SSLMODE:require}
   jpa:
     show-sql: false
     properties:
       hibernate:
         format_sql: false
 
+app:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS}
+  security:
+    jwt:
+      secret: ${JWT_SECRET}
+      access-token-expiration-ms: ${JWT_ACCESS_TOKEN_EXPIRATION_MS:900000}
+      refresh-token-expiration-ms: ${JWT_REFRESH_TOKEN_EXPIRATION_MS:604800000}
+    refresh-cookie:
+      name: ${REFRESH_COOKIE_NAME:kernel_refresh}
+      secure: ${REFRESH_COOKIE_SECURE:true}
+      same-site: ${REFRESH_COOKIE_SAME_SITE:Lax}
+      path: /api/v1/auth
+  github:
+    client-id: ${GITHUB_CLIENT_ID}
+    client-secret: ${GITHUB_CLIENT_SECRET}
+    redirect-uri: ${GITHUB_REDIRECT_URI}
+    scope: ${GITHUB_SCOPE:read:user}
+    oauth-authorize-url: ${GITHUB_OAUTH_AUTHORIZE_URL:https://github.com/login/oauth/authorize}
+    oauth-token-url: ${GITHUB_OAUTH_TOKEN_URL:https://github.com/login/oauth/access_token}
+    api-url: ${GITHUB_API_URL:https://api.github.com}
+    token-encryption-key: ${GITHUB_TOKEN_ENCRYPTION_KEY}
+
 logging:
   level:
     root: WARN
     com.mittechkernel.backend: INFO
     org.springframework.security: WARN
+    org.springframework.web: WARN
     org.hibernate: WARN
+    org.hibernate.SQL: WARN
 
 server:
-  port: ${SERVER_PORT:8080}
+  address: 0.0.0.0
+  forward-headers-strategy: framework
+  error:
+    include-message: never
+    include-binding-errors: never
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus
+        include: health
   endpoint:
     health:
       show-details: never
+  info:
+    env:
+      enabled: false

@@ -132,7 +132,7 @@ tech-kernel-backend/
 │   │       ├── application-dev.yml       # Development profile
 │   │       ├── application-prod.yml      # Production profile
 │   │       └── db/
-│   │           └── migration/            # Flyway SQL migrations (empty, baseline only)
+│   │           └── migration/            # Flyway SQL migrations V1–V17
 │   └── test/
 │       └── java/
 │           └── com/
@@ -261,7 +261,7 @@ The application starts on **port 8080** with the `dev` profile active.
 | `DATABASE_URL` | Yes | JDBC URL for Spring Boot | `jdbc:postgresql://localhost:5433/tech_kernel` |
 | `DATABASE_USERNAME` | Yes | DB username for Spring Boot | `tech_kernel` |
 | `DATABASE_PASSWORD` | Yes | DB password for Spring Boot | `changeme` |
-| `SERVER_PORT` | No | HTTP server port | `8080` |
+| `PORT` | No | HTTP server port; Render supplies this for web services | `8080` |
 
 All variables are read from the environment (or `.env` via Docker Compose). **Never commit `.env` or real secrets.**
 
@@ -273,8 +273,9 @@ All variables are read from the environment (or `.env` via Docker Compose). **Ne
 - **Container**: `tech-kernel-postgres` (via Docker Compose)
 - **Host Port**: 5433 → Container Port: 5432
 - **Volume**: `postgres_data` (persistent, survives container restart)
-- **Flyway**: Enabled, migrations from `classpath:db/migration`, `baseline-on-migrate: true`, `validate-on-migrate: true`
-- **Current State**: Empty schema (baseline only, no business migrations yet)
+- **Flyway**: Enabled, migrations from `classpath:db/migration`, Hibernate uses `ddl-auto: validate`
+- **Current State**: Migrations V1–V17 define the application schema. V8 adds reference domains/achievements; V9 and V10 are explicitly identified demo-user and walkthrough data seeds. Review [Production deployment audit and Supabase setup](docs/PRODUCTION-DEPLOYMENT-AUDIT.md) before using a production database.
+- **Production safety**: Flyway clean is disabled, SSL is required by default, and production will not silently baseline an existing schema. Existing database history must be inspected before first startup.
 - **Hibernate DDL**: `validate` (no auto-DDL in production)
 
 ### Database Commands
@@ -421,20 +422,15 @@ Types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `perf`
 
 ## Current Implementation Status
 
-### ✅ Implemented (Foundation/Infrastructure)
-- Spring Boot 4.1.1 project with Java 25
-- Maven wrapper (`mvnw`)
-- PostgreSQL 16 via Docker Compose (port 5433)
-- Flyway migration baseline configuration
-- Spring Security starter (default config only)
-- Spring Data JPA / Hibernate with `ddl-auto: validate`
-- Actuator endpoints (`/actuator/health`, etc.)
-- Profile-specific configuration (`dev`, `prod`)
-- Modular package structure (8 modules created, 8 more planned)
-- ArchUnit architecture tests (9 boundary rules passing)
-- Global exception handling structure (`common/exception/`)
-- Standard API response wrappers (`common/response/`)
-- Git initialized with `.gitignore` for Java/Maven/IDE/environment files
+### Current implementation
+
+This README began as a scaffold document and some architecture notes below may
+describe an earlier planned state. The repository now contains authentication,
+authorization, account administration, projects, sessions, resources, tasks,
+attendance, gamification, GitHub integration, and Flyway migrations V1–V17.
+Use the source tree and the current feature/operations documents as the source
+of truth. The V9/V10 demo seeds are a production deployment blocker; see the
+production audit before pointing the backend at a live database.
 
 ### 📋 Documented (Architecture & Design)
 - Module responsibilities & dependency matrix
@@ -463,6 +459,8 @@ Types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `perf`
 
 | Document | Path |
 |----------|------|
+| Render deployment | `docs/RENDER-DEPLOYMENT.md` |
+| Production deployment audit and Supabase setup | `docs/PRODUCTION-DEPLOYMENT-AUDIT.md` |
 | Architecture Overview | `docs/architecture/overview.md` |
 | Module Responsibilities | `docs/architecture/modules.md` |
 | RBAC Model | `docs/architecture/rbac.md` |
@@ -516,7 +514,7 @@ sdk use java 25.0.4-oracle  # or your installed version
 ```
 
 ### Port Conflicts
-- **8080** — Spring Boot server port (change via `SERVER_PORT` env var)
+- **8080** — local Spring Boot fallback port (Render supplies `PORT`)
 - **5433** — PostgreSQL host port (change in `docker-compose.yml` and `DATABASE_URL`)
 
 ### Tests Failing

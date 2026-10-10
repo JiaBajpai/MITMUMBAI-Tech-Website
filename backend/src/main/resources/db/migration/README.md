@@ -26,22 +26,31 @@ Examples:
 
 ## Applying Migrations
 
-Migrations run automatically on application startup when `spring.flyway.enabled=true` (default).
+Flyway is the only schema-management mechanism and runs on application startup
+when enabled. Both `dev` and `prod` use the Maven-generated
+`db/migration-production` resource set, which excludes V9 and V10. This keeps
+normal startup free of historical demo accounts and business records. The
+explicit `demo` profile uses the full historical `db/migration` location and
+is only for a disposable database. Do not change V1–V10 after they have been
+applied.
 
-To run migrations manually:
-```bash
-mvn flyway:migrate
+The complete historical chain is also available through the explicit `demo`
+profile for a disposable local database:
+
+```sh
+./mvnw -Dspring-boot.run.profiles=demo spring-boot:run
 ```
 
-To check migration status:
-```bash
-mvn flyway:info
-```
+Use that profile only against a disposable local database. It can insert V9 or
+V10 if either migration is pending. Never use it on a database with genuine
+or unknown data. A database that already records V9/V10 will not validate
+against the normal dev/prod bundle because those versions are intentionally
+unresolved there. Do not baseline, repair, or delete records to silence a
+validation error. Resolve such histories through an approved compatibility
+plan; do not start the application until then.
 
-To baseline an existing database:
-```bash
-mvn flyway:baseline -Dflyway.baselineVersion=0
-```
+Automatic baselining is disabled. Never baseline an existing database without
+a separately reviewed migration-history procedure.
 
 ## Production Configuration
 

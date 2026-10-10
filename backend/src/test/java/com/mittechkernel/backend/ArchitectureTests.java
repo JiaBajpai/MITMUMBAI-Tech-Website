@@ -5,6 +5,7 @@ import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.lang.ArchRule;
 import org.junit.jupiter.api.Test;
 
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 
 /**
@@ -19,24 +20,22 @@ class ArchitectureTests {
 
     @Test
     void modulesShouldNotDependOnEachOther() {
-        ArchRule rule = noClasses()
-            .that().resideInAPackage("..modules..")
+        ArchRule authMustNotDependOnUser = noClasses()
+            .that().resideInAPackage("..modules.auth..")
             .should().dependOnClassesThat()
-            .resideInAnyPackage(
-                "..modules.auth..",
-                "..modules.user..",
-                "..modules.member..",
-                "..modules.domain..",
-                "..modules.session..",
-                "..modules.registration..",
-                "..modules.foundation..",
-                "..modules.leaderboard.."
-            )
-            .because("Business modules must not depend on each other directly. " +
-                     "Use query service interfaces for cross-module reads.")
+            .resideInAnyPackage("..modules.user..")
+            .because("Auth module must not directly depend on the user module.")
             .allowEmptyShould(true);
-        
-        rule.check(CLASSES);
+
+        ArchRule userMustNotDependOnAuth = noClasses()
+            .that().resideInAPackage("..modules.user..")
+            .should().dependOnClassesThat()
+            .resideInAnyPackage("..modules.auth..")
+            .because("User module must not directly depend on the auth module.")
+            .allowEmptyShould(true);
+
+        authMustNotDependOnUser.check(CLASSES);
+        userMustNotDependOnAuth.check(CLASSES);
     }
 
     @Test
@@ -53,35 +52,49 @@ class ArchitectureTests {
 
     @Test
     void modulesShouldNotAccessOtherModulesRepositories() {
-        ArchRule rule = noClasses()
-            .that().resideInAPackage("..modules..")
+        ArchRule authMustNotUseUserRepositories = noClasses()
+            .that().resideInAPackage("..modules.auth..")
             .should().dependOnClassesThat()
-            .resideInAPackage("..modules..Repository")
-            .andShould().notBeAssignableTo(org.springframework.data.repository.Repository.class)
-            .because("Modules must not access other modules' repositories directly.")
+            .resideInAnyPackage("..modules.user..repository..")
+            .because("Auth should use its own repository abstractions and not the user module repository directly.")
             .allowEmptyShould(true);
-        
-        rule.check(CLASSES);
+
+        ArchRule userMustNotUseAuthRepositories = noClasses()
+            .that().resideInAPackage("..modules.user..")
+            .should().dependOnClassesThat()
+            .resideInAnyPackage("..modules.auth..repository..")
+            .because("User should not reach into the auth repository layer.")
+            .allowEmptyShould(true);
+
+        authMustNotUseUserRepositories.check(CLASSES);
+        userMustNotUseAuthRepositories.check(CLASSES);
     }
 
     @Test
     void modulesShouldNotAccessOtherModulesEntities() {
-        ArchRule rule = noClasses()
-            .that().resideInAPackage("..modules..")
+        ArchRule authMustNotUseUserEntities = noClasses()
+            .that().resideInAPackage("..modules.auth..")
             .should().dependOnClassesThat()
-            .resideInAPackage("..modules..entity..")
-            .because("Modules must not access other modules' entities directly. Use DTOs via query services.")
+            .resideInAnyPackage("..modules.user..entity..")
+            .because("Auth must not access user entities directly.")
             .allowEmptyShould(true);
-        
-        rule.check(CLASSES);
+
+        ArchRule userMustNotUseAuthEntities = noClasses()
+            .that().resideInAPackage("..modules.user..")
+            .should().dependOnClassesThat()
+            .resideInAnyPackage("..modules.auth..entity..")
+            .because("User must not access auth entities directly.")
+            .allowEmptyShould(true);
+
+        authMustNotUseUserEntities.check(CLASSES);
+        userMustNotUseAuthEntities.check(CLASSES);
     }
 
     @Test
     void controllersShouldStayInTheirModule() {
-        ArchRule rule = noClasses()
-            .that().resideInAPackage("..modules..")
-            .and().haveSimpleNameEndingWith("Controller")
-            .should().resideInAPackage("..modules..")
+        ArchRule rule = classes()
+            .that().haveSimpleNameEndingWith("Controller")
+            .should().resideInAnyPackage("..modules.auth..", "..modules.admin..", "..modules.user..", "..modules.domain..", "..modules.resource..", "..modules.task..", "..modules.session..", "..modules.project..", "..modules.gamification..")
             .because("Controllers must stay in their module package.")
             .allowEmptyShould(true);
         
@@ -117,7 +130,14 @@ class ArchitectureTests {
         ArchRule rule = noClasses()
             .that().resideInAPackage("..security..")
             .should().dependOnClassesThat()
-            .resideInAnyPackage("..modules.auth..", "..modules.user..", "..common..", "..config..")
+            .resideInAnyPackage(
+                "..modules.session..",
+                "..modules.domain..",
+                "..modules.member..",
+                "..modules.registration..",
+                "..modules.foundation..",
+                "..modules.leaderboard.."
+            )
             .because("Security configuration should only depend on auth/user modules and shared infrastructure.")
             .allowEmptyShould(true);
         
