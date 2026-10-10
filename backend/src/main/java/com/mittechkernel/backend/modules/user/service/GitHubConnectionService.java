@@ -18,17 +18,21 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Service
 public class GitHubConnectionService {
 
-    private static final String GITHUB_OAUTH_STATE = "GITHUB_OAUTH_STATE";
-    private static final String GITHUB_PENDING_USER_ID = "GITHUB_PENDING_USER_ID";
-    private static final String GITHUB_PKCE_VERIFIER = "GITHUB_PKCE_VERIFIER";
+    private static final String GITHUB_PENDING_CONNECTIONS = "GITHUB_PENDING_CONNECTIONS";
+    private static final int MAX_PENDING_CONNECTIONS = 5;
+    private static final Duration PENDING_CONNECTION_LIFETIME = Duration.ofMinutes(10);
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     private final GitHubProperties gitHubProperties;
@@ -55,9 +59,17 @@ public class GitHubConnectionService {
         String state = newOAuthState();
         String codeVerifier = newOAuthState();
         String codeChallenge = createCodeChallenge(codeVerifier);
-        session.setAttribute(GITHUB_OAUTH_STATE, state);
-        session.setAttribute(GITHUB_PENDING_USER_ID, currentUser.id());
-        session.setAttribute(GITHUB_PKCE_VERIFIER, codeVerifier);
+        synchronized (session) {
+            Map<String, PendingConnection> pending = pendingConnections(session);
+            removeExpiredPendingConnections(pending, Instant.now());
+            session.setAttribute(GITHUB_PENDING_CONNECTIONS, pending);
+            if (pending.size() >= MAX_PENDING_CONNECTIONS) {
+                throw new BadRequestException("Too many GitHub authorization attempts are pending. Complete or close one and retry.");
+            }
+            pending.put(state, new PendingConnection(currentUser.id(), codeVerifier,
+                    Instant.now().plus(PENDING_CONNECTION_LIFETIME)));
+            session.setAttribute(GITHUB_PENDING_CONNECTIONS, pending);
+        }
 
         String authorizationUrl = UriComponentsBuilder.fromUriString(gitHubProperties.getOauthAuthorizeUrl())
                 .queryParam("client_id", gitHubProperties.getClientId())
@@ -87,23 +99,27 @@ public class GitHubConnectionService {
             throw new BadRequestException("GitHub callback state is required");
         }
 
-        String expectedState = (String) session.getAttribute(GITHUB_OAUTH_STATE);
-        if (!statesMatch(expectedState, state)) {
-            throw new BadRequestException("Invalid GitHub callback state");
+        PendingConnection pendingConnection;
+        synchronized (session) {
+            Map<String, PendingConnection> pending = pendingConnections(session);
+            removeExpiredPendingConnections(pending, Instant.now());
+            session.setAttribute(GITHUB_PENDING_CONNECTIONS, pending);
+            if (pending.isEmpty()) {
+                session.removeAttribute(GITHUB_PENDING_CONNECTIONS);
+                throw new BadRequestException("Invalid GitHub callback state");
+            }
+            String matchingState = pending.keySet().stream().filter(expected -> statesMatch(expected, state)).findFirst().orElse(null);
+            if (matchingState == null) throw new BadRequestException("Invalid GitHub callback state");
+            pendingConnection = pending.remove(matchingState);
+            if (pendingConnection == null || pendingConnection.userId() == null) {
+                throw new BadRequestException("GitHub connection session is invalid");
+            }
+            if (isBlank(pendingConnection.codeVerifier())) {
+                throw new BadRequestException("GitHub PKCE session is invalid");
+            }
+            if (pending.isEmpty()) session.removeAttribute(GITHUB_PENDING_CONNECTIONS);
+            else session.setAttribute(GITHUB_PENDING_CONNECTIONS, pending);
         }
-
-        Long userId = (Long) session.getAttribute(GITHUB_PENDING_USER_ID);
-        String codeVerifier = (String) session.getAttribute(GITHUB_PKCE_VERIFIER);
-        if (userId == null) {
-            throw new BadRequestException("GitHub connection session is invalid");
-        }
-        if (isBlank(codeVerifier)) {
-            throw new BadRequestException("GitHub PKCE session is invalid");
-        }
-
-        session.removeAttribute(GITHUB_OAUTH_STATE);
-        session.removeAttribute(GITHUB_PENDING_USER_ID);
-        session.removeAttribute(GITHUB_PKCE_VERIFIER);
 
         if (providerError != null && !providerError.isBlank()) {
             if ("access_denied".equals(providerError)) {
@@ -115,9 +131,9 @@ public class GitHubConnectionService {
             throw new BadRequestException("GitHub authorization code is required");
         }
 
-        String accessToken = gitHubClient.exchangeCodeForAccessToken(code, gitHubProperties.getRedirectUri(), codeVerifier);
+        String accessToken = gitHubClient.exchangeCodeForAccessToken(code, gitHubProperties.getRedirectUri(), pendingConnection.codeVerifier());
         GitHubIdentity identity = gitHubClient.getAuthenticatedUser(accessToken);
-        persistConnection(userId, accessToken, identity);
+        persistConnection(pendingConnection.userId(), accessToken, identity);
 
         return new GitHubCallbackResponse("GITHUB", "accepted");
     }
@@ -218,6 +234,22 @@ public class GitHubConnectionService {
         }
         return MessageDigest.isEqual(expectedState.getBytes(StandardCharsets.UTF_8), actualState.getBytes(StandardCharsets.UTF_8));
     }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, PendingConnection> pendingConnections(HttpSession session) {
+        Object value = session.getAttribute(GITHUB_PENDING_CONNECTIONS);
+        if (value == null) return new LinkedHashMap<>();
+        if (value instanceof Map<?, ?>) return (Map<String, PendingConnection>) value;
+        throw new BadRequestException("GitHub connection session is invalid");
+    }
+
+    private void removeExpiredPendingConnections(Map<String, PendingConnection> pending, Instant now) {
+        pending.entrySet().removeIf(entry -> entry.getValue() == null
+                || entry.getValue().expiresAt() == null
+                || !entry.getValue().expiresAt().isAfter(now));
+    }
+
+    record PendingConnection(Long userId, String codeVerifier, Instant expiresAt) implements java.io.Serializable {}
 
     private boolean isBlank(String value) {
         return value == null || value.isBlank();

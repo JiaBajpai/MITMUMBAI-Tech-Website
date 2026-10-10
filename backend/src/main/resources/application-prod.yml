@@ -27,7 +27,7 @@ app:
     refresh-cookie:
       name: ${REFRESH_COOKIE_NAME:kernel_refresh}
       secure: ${REFRESH_COOKIE_SECURE:true}
-      same-site: ${REFRESH_COOKIE_SAME_SITE:Lax}
+      same-site: ${REFRESH_COOKIE_SAME_SITE:None}
       path: /api/v1/auth
   github:
     client-id: ${GITHUB_CLIENT_ID}
@@ -51,6 +51,13 @@ logging:
 server:
   address: 0.0.0.0
   forward-headers-strategy: framework
+  servlet:
+    session:
+      cookie:
+        http-only: true
+        secure: true
+        path: /
+        same-site: None
   error:
     include-message: never
     include-binding-errors: never
